@@ -57,23 +57,23 @@ int main(int argc, char **argv) {
 
 	auto& cmd = result.command->name;
 	if (cmd == "add") {
-        add(result.command.value());
+        return add(result.command.value()) ? 0 : 1;
 	} else if (cmd == "branch") {
-        branch(result.command.value());
+        return branch(result.command.value()) ? 0 : 1;
 	} else if (cmd == "clone") {
-        clone(result.command.value());
+        return clone(result.command.value()) ? 0 : 1;
 	} else if (cmd == "commit") {
-        commit(result.command.value());
+        return commit(result.command.value()) ? 0 : 1;
 	} else if (cmd == "pull") {
-        pull(result.command.value());
+        return pull(result.command.value()) ? 0 : 1;
 	} else if (cmd == "push") {
-        push(result.command.value());
+        return push(result.command.value()) ? 0 : 1;
 	} else if (cmd == "reset") {
-        reset(result.command.value());
+        return reset(result.command.value()) ? 0 : 1;
 	} else if (cmd == "rm") {
-        rm(result.command.value());
+        return rm(result.command.value()) ? 0 : 1;
 	} else if (cmd == "status") {
-        status(result.command.value());
+        return status(result.command.value()) ? 0 : 1;
 	} else {
 		std::cerr << "error: unknown command '" + cmd + "'\n";
 		return 1;
