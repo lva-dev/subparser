@@ -1,7 +1,7 @@
 #include <iostream>
 #include <subparser/subparser.h>
 #include <unordered_map>
-
+// commands
 #include "add.h"
 #include "branch.h"
 #include "clone.h"
@@ -11,6 +11,8 @@
 #include "reset.h"
 #include "rm.h"
 #include "status.h"
+// utils
+#include "util.h"
 
 const std::string& usage() {
 	static const std::string USAGE = R"(usage: git [-v | --version] [-h | --help] <command> [<args>]
@@ -26,14 +28,6 @@ commands:
   rm
   status)";
 	return USAGE;
-}
-
-bool has_opt(const subparser::Options& options, std::string opt, std::string alt_opt = "") {
-	if (options.count(opt) == 1) {
-		return true;
-	} else {
-		return !alt_opt.empty() && options.count(alt_opt) == 1;
-	}
 }
 
 int main(int argc, char **argv) {
@@ -57,23 +51,23 @@ int main(int argc, char **argv) {
 
 	auto& cmd = result.command->name;
 	if (cmd == "add") {
-        return add(result.command.value()) ? 0 : 1;
+		return add(result.command.value()) ? 0 : 1;
 	} else if (cmd == "branch") {
-        return branch(result.command.value()) ? 0 : 1;
+		return branch(result.command.value()) ? 0 : 1;
 	} else if (cmd == "clone") {
-        return clone(result.command.value()) ? 0 : 1;
+		return clone(result.command.value()) ? 0 : 1;
 	} else if (cmd == "commit") {
-        return commit(result.command.value()) ? 0 : 1;
+		return commit(result.command.value()) ? 0 : 1;
 	} else if (cmd == "pull") {
-        return pull(result.command.value()) ? 0 : 1;
+		return pull(result.command.value()) ? 0 : 1;
 	} else if (cmd == "push") {
-        return push(result.command.value()) ? 0 : 1;
+		return push(result.command.value()) ? 0 : 1;
 	} else if (cmd == "reset") {
-        return reset(result.command.value()) ? 0 : 1;
+		return reset(result.command.value()) ? 0 : 1;
 	} else if (cmd == "rm") {
-        return rm(result.command.value()) ? 0 : 1;
+		return rm(result.command.value()) ? 0 : 1;
 	} else if (cmd == "status") {
-        return status(result.command.value()) ? 0 : 1;
+		return status(result.command.value()) ? 0 : 1;
 	} else {
 		std::cerr << "error: unknown command '" + cmd + "'\n";
 		return 1;

@@ -9,25 +9,26 @@
 #include <vector>
 
 namespace subparser {
-	using Options = std::unordered_set<std::string>;
-	// using Options = std::unordered_map<std::string, std::string>;
+	using BooleanOptions = std::unordered_set<std::string>;
+	using ValueOptions = std::unordered_map<std::string, std::string>;
 	using Arguments = std::vector<std::string>;
 
 	struct Command {
 		std::string name;
-		Options boolean_options;
+		BooleanOptions boolean_options;
+		ValueOptions value_options;
 		Arguments arguments;
 	};
 
 	struct SubparseResult {
-		Options boolean_options;
-		std::unordered_map<std::string, std::string> value_options;
+		BooleanOptions boolean_options;
+		ValueOptions value_options;
 		std::optional<Command> command;
 	};
 
 	class Subparser {
 	private:
-		Options _options_with_required_values;
+		BooleanOptions _options_with_required_values;
 	public:
 		inline SubparseResult parse(int argc, char **argv) {
 			std::vector<std::string> args_view = {argv + 1, argv + argc};
@@ -53,7 +54,8 @@ namespace subparser {
 				for (std::size_t i = arg_index + 1; i < args.size(); i++) {
 					std::string arg {args[i]};
 					if (!onlyArgs && _is_option(arg)) {
-						result.command->boolean_options.insert(arg);
+						_parse_option(arg_index, args, result.command.value());
+						arg_index++;
 					} else {
 						if (!onlyArgs && arg == "--") {
 							onlyArgs = true;
@@ -70,6 +72,19 @@ namespace subparser {
 		inline bool _parse_option(std::size_t index,
 			const std::vector<std::string>& args,
 			SubparseResult& result) {
+			return _parse_option(index, args, result.boolean_options, result.value_options);
+		}
+
+		inline bool
+		_parse_option(std::size_t index, const std::vector<std::string>& args, Command& command) {
+			return _parse_option(index, args, command.boolean_options, command.value_options);
+		}
+
+		inline bool _parse_option(std::size_t index,
+			const std::vector<std::string>& args,
+			BooleanOptions& boolean_options,
+			ValueOptions& value_options) {
+
 			std::string option = args[index];
 			if (_options_with_required_values.count(option) == 1) {
 				if (index == args.size() - 1) {
@@ -78,22 +93,22 @@ namespace subparser {
 					return false;
 				}
 
-				result.value_options[option] = args[index + 1];
+				value_options[option] = args[index + 1];
 			} else {
-				result.boolean_options.insert(option);
+				boolean_options.insert(option);
 			}
 
 			return true;
 		}
 
-		inline Options _parse_short_option(std::string_view option_str) {
+		inline BooleanOptions _parse_short_option(std::string_view option_str) {
 			using namespace std::string_literals;
 
 			if (!_is_short_option(option_str)) {
 				return {};
 			}
 
-			Options optionsSet;
+			BooleanOptions optionsSet;
 			for (std::size_t i = 1; i < option_str.size(); i++) {
 				optionsSet.insert("-"s + option_str[i]);
 			}
