@@ -3,7 +3,7 @@
 #include <subparser/subparser.h>
 #include <filesystem>
 
-inline bool add(const subparser::Command& command) {
+inline bool add(const subparser::SubCommand& command) {
     namespace fs = std::filesystem;
     
     if (command.arguments.empty()) {

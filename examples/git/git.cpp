@@ -31,43 +31,63 @@ commands:
 }
 
 int main(int argc, char **argv) {
-	subparser::Subparser parser;
-	subparser::SubparseResult result = parser.parse(argc, argv);
+	subparser::parser parser;
+	subparser::parse_result result = parser.value_opt("-m").parse(argc, argv);
 
-	if (has_opt(result.boolean_options, "--help", "-h")) {
+	if (!result) {
+		std::cerr << "error parsing command-line: " << result.error().description() << '\n';
+		return 1;
+	}
+
+	auto command = result.command();
+
+	if (has_opt(command.bool_opts, "--help", "-h")) {
 		std::cout << usage() << '\n';
 		return 0;
 	}
 
-	if (has_opt(result.boolean_options, "--version", "-v")) {
+	if (has_opt(command.bool_opts, "--version", "-v")) {
 		std::cout << "0.1.0\n";
 		return 0;
 	}
 
-	if (!result.command) {
+	auto subcommand = command.subcommand;
+	if (!subcommand) {
 		std::cout << usage() << '\n';
 		return 0;
 	}
 
-	auto& cmd = result.command->name;
+	for (auto& arg : subcommand->arguments) {
+		std::cerr << "arg: '" + arg + "'\n";
+	}
+
+	for (auto& opt : subcommand->bool_opts) {
+		std::cerr << "opt: '" + opt + "'\n";
+	}
+
+	for (auto& pair : subcommand->value_opts) {
+		std::cerr << "opt: '" + pair.first + "'='" + pair.second + "'\n";
+	}
+
+	auto& cmd = subcommand->name;
 	if (cmd == "add") {
-		return add(result.command.value()) ? 0 : 1;
+		return add(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "branch") {
-		return branch(result.command.value()) ? 0 : 1;
+		return branch(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "clone") {
-		return clone(result.command.value()) ? 0 : 1;
+		return clone(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "commit") {
-		return commit(result.command.value()) ? 0 : 1;
+		return commit(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "pull") {
-		return pull(result.command.value()) ? 0 : 1;
+		return pull(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "push") {
-		return push(result.command.value()) ? 0 : 1;
+		return push(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "reset") {
-		return reset(result.command.value()) ? 0 : 1;
+		return reset(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "rm") {
-		return rm(result.command.value()) ? 0 : 1;
+		return rm(subcommand.value()) ? 0 : 1;
 	} else if (cmd == "status") {
-		return status(result.command.value()) ? 0 : 1;
+		return status(subcommand.value()) ? 0 : 1;
 	} else {
 		std::cerr << "error: unknown command '" + cmd + "'\n";
 		return 1;
